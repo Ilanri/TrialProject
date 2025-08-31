@@ -16,7 +16,7 @@ def construct_persona_from_intro(intro_text, llm_api_url, llm_api_key):
     )
 
     data = {
-        "model": "llama3-8b-8192",
+        "model": "llama-3.3-70b-versatile",
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": intro_text}

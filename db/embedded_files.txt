@@ -1,5 +1,3 @@
 intro.txt
-CV.pdf
-embedded_files.txt
 Faithfulness, Not Fame.mp3
-persona_prompt.txt
+CV.pdf
