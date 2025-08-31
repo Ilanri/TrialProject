@@ -1,15 +1,21 @@
 
+
 import os
 import streamlit as st
 import faiss
 from sentence_transformers import SentenceTransformer
 import numpy as np
-
-# Placeholder for Groq LLM API (replace with actual API call)
 import requests
+from db_utils import save_faiss_index, load_faiss_index, save_docs_and_embeddings, load_docs_and_embeddings
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"  # Placeholder, update as needed
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+
+DB_DIR = "db"
+FAISS_INDEX_PATH = os.path.join(DB_DIR, "faiss.index")
+DOCS_EMB_PATH = os.path.join(DB_DIR, "docs_emb.pkl")
+
+os.makedirs(DB_DIR, exist_ok=True)
 
 @st.cache_resource
 def load_model():
@@ -41,11 +47,42 @@ def groq_chat(prompt, context=""):
 
 st.title("RAG Chatbot with Groq and FAISS")
 
+
+def try_load_db():
+	docs, embeddings, index = [], None, None
+	if os.path.exists(DOCS_EMB_PATH) and os.path.exists(FAISS_INDEX_PATH):
+		try:
+			docs, embeddings = load_docs_and_embeddings(DOCS_EMB_PATH)
+			index = load_faiss_index(FAISS_INDEX_PATH)
+		except Exception as e:
+			st.warning(f"Could not load persistent DB: {e}")
+	return docs, embeddings, index
+
+
+def load_txt_files_from_db():
+	txts = []
+	for fname in os.listdir(DB_DIR):
+		if fname.endswith('.txt'):
+			with open(os.path.join(DB_DIR, fname), 'r', encoding='utf-8') as f:
+				txts.append(f.read())
+	return txts
+
 if 'docs' not in st.session_state:
-	st.session_state.docs = []
-	st.session_state.embeddings = None
-	st.session_state.index = None
-	st.session_state.model = load_model()
+	docs, embeddings, index = try_load_db()
+	# If no persistent DB, try to load .txt files from db/
+	if not docs:
+		docs = load_txt_files_from_db()
+		if docs:
+			st.session_state.model = load_model()
+			embeddings = embed_texts(docs, st.session_state.model)
+			index = create_faiss_index(embeddings)
+			save_docs_and_embeddings(docs, embeddings, DOCS_EMB_PATH)
+			save_faiss_index(index, FAISS_INDEX_PATH)
+	st.session_state.docs = docs
+	st.session_state.embeddings = embeddings
+	st.session_state.index = index
+	if 'model' not in st.session_state:
+		st.session_state.model = load_model()
 
 st.sidebar.header("Knowledge Base")
 uploaded_files = st.sidebar.file_uploader("Upload text files", type=["txt"], accept_multiple_files=True)
@@ -57,7 +94,10 @@ if uploaded_files:
 	embeddings = embed_texts(docs, st.session_state.model)
 	st.session_state.embeddings = embeddings
 	st.session_state.index = create_faiss_index(embeddings)
-	st.sidebar.success(f"Loaded {len(docs)} documents.")
+	# Persist to disk
+	save_docs_and_embeddings(docs, embeddings, DOCS_EMB_PATH)
+	save_faiss_index(st.session_state.index, FAISS_INDEX_PATH)
+	st.sidebar.success(f"Loaded and saved {len(docs)} documents.")
 
 def retrieve_context(query, k=2):
 	if st.session_state.index is None:
