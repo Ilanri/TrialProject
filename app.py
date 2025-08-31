@@ -8,8 +8,8 @@ import numpy as np
 # Placeholder for Groq LLM API (replace with actual API call)
 import requests
 
-GROQ_API_URL = "https://api.groq.com/v1/chat/completions"  # Placeholder, update as needed
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"  # Placeholder, update as needed
+GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 
 @st.cache_resource
 def load_model():
