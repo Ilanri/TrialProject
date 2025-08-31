@@ -193,10 +193,38 @@ if 'embedded_files' in st.session_state:
 		st.sidebar.write(f"- {fname}")
 
 
-uploaded_files = st.sidebar.file_uploader(
+
+
+
+
+def retrieve_context(query, k=10):
+	if st.session_state.index is None:
+		return ""
+	query_emb = embed_texts([query], st.session_state.model)
+	D, I = st.session_state.index.search(query_emb, k)
+	return "\n".join([st.session_state.docs[i] for i in I[0] if i < len(st.session_state.docs)])
+
+# --- Main Prompt/Answer Section ---
+st.write("Ask a question about your uploaded documents:")
+user_input = st.text_input("You:", value=st.session_state.get('user_input', ''), key="main_user_input")
+
+if st.button("Send", key="main_send_button") and user_input:
+	context = retrieve_context(user_input)
+	with st.spinner("Groq is thinking..."):
+		answer = groq_chat(user_input, context)
+	st.markdown(f"**Bot:** {answer}")
+	st.session_state['user_input'] = ""
+
+# --- Enhance Database Section (below main prompt/answer) ---
+st.markdown("---")
+st.header("Enhance database")
+st.markdown("Upload files or add Q&A pairs to expand the knowledge base.")
+
+uploaded_files = st.file_uploader(
 	"Upload files (txt, pdf, audio)",
 	type=["txt", "pdf", "mp3", "wav", "ogg", "m4a"],
-	accept_multiple_files=True
+	accept_multiple_files=True,
+	key="file_uploader_enhance"
 )
 if uploaded_files:
 	new_chunks = []
@@ -216,7 +244,90 @@ if uploaded_files:
 		st.session_state.index = create_faiss_index(embeddings)
 		save_docs_and_embeddings(st.session_state.docs, embeddings, DOCS_EMB_PATH)
 		save_faiss_index(st.session_state.index, FAISS_INDEX_PATH)
-		st.sidebar.success(f"Added and saved {len(new_chunks)} new chunks.")
+		st.success(f"Added and saved {len(new_chunks)} new chunks.")
+
+
+# --- LLM-generated suggested questions for Q&A section ---
+import json
+def get_llm_suggested_questions(persona, n=3):
+	prompt = (
+		f"You are a helpful assistant. Based on the following persona, suggest {n} personal, diverse, or random introspective, but short and fun questions that a user could add to a knowledge base as Q&A pairs. "
+		f"Return only a JSON list of questions.\n\nPersona:\n{persona}"
+	)
+	headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
+	data = {
+		"model": "llama-3.3-70b-versatile",
+		"messages": [
+			{"role": "system", "content": prompt}
+		]
+	}
+	try:
+		response = requests.post(GROQ_API_URL, headers=headers, json=data, timeout=20)
+		if response.status_code == 200:
+			content = response.json()['choices'][0]['message']['content']
+			# Try to parse as JSON list
+			try:
+				questions = json.loads(content)
+				if isinstance(questions, list):
+					return [str(q).strip() for q in questions][:n]
+			except Exception:
+				# Fallback: try to extract JSON array from text
+				import re
+				match = re.search(r'\[(.*?)\]', content, re.DOTALL)
+				if match:
+					items = match.group(1).split(',')
+					return [item.strip(' "\n') for item in items if item.strip()][:n]
+				# Fallback: split by lines
+				return [line.strip('- ').strip() for line in content.split('\n') if line.strip()][:n]
+		else:
+			return ["What is a good question to add?", "What is a useful fact?", "What is a common FAQ?"]
+	except Exception:
+		return ["What is a good question to add?", "What is a useful fact?", "What is a common FAQ?"]
+
+
+# Initialize or refresh suggested questions
+if 'suggested_questions' not in st.session_state or st.session_state.get('refresh_suggested', True):
+	persona = get_or_create_persona()
+	st.session_state.suggested_questions = get_llm_suggested_questions(persona)
+	st.session_state.refresh_suggested = False
+
+# Function to update suggested questions after Q&A is added
+def update_suggested_questions_qa(latest_answer=None):
+	persona = get_or_create_persona()
+	st.session_state.suggested_questions = get_llm_suggested_questions(persona)
+
+st.markdown("**Add Q&A to database**")
+suggestion_cols = st.columns(len(st.session_state.suggested_questions))
+for i, q in enumerate(st.session_state.suggested_questions):
+	if suggestion_cols[i].button(q, key=f"qa_suggested_{i}"):
+		st.session_state.qa_question = q
+
+if 'qa_question' not in st.session_state:
+    st.session_state.qa_question = ""
+if 'qa_answer' not in st.session_state:
+    st.session_state.qa_answer = ""
+
+
+with st.form("add_qa_form"):
+	user_question = st.text_area("Question", key="qa_question")
+	user_answer = st.text_area("Answer", value=st.session_state.qa_answer, key="qa_answer")
+	submit_qa = st.form_submit_button("Add Q&A", key="submit_qa_button")
+	if submit_qa and user_question.strip() and user_answer.strip():
+		with st.spinner("Adding Q&A to database..."):
+			qa_text = f"Q: {user_question.strip()}\nA: {user_answer.strip()}"
+			st.session_state.docs.append(qa_text)
+			st.session_state.chunk_file_map.append("manual_QA")
+			embeddings = embed_texts(st.session_state.docs, st.session_state.model)
+			st.session_state.embeddings = embeddings
+			st.session_state.index = create_faiss_index(embeddings)
+			save_docs_and_embeddings(st.session_state.docs, embeddings, DOCS_EMB_PATH)
+			save_faiss_index(st.session_state.index, FAISS_INDEX_PATH)
+		st.success("Q&A pair added to database.")
+		update_suggested_questions_qa(user_answer)
+		# Rerun to clear form fields safely
+		st.rerun()
+
+
 
 def retrieve_context(query, k=10):
 	if st.session_state.index is None:
@@ -226,11 +337,3 @@ def retrieve_context(query, k=10):
 
 	return "\n".join([st.session_state.docs[i] for i in I[0] if i < len(st.session_state.docs)])
 
-st.write("Ask a question about your uploaded documents:")
-user_input = st.text_input("You:")
-
-if st.button("Send") and user_input:
-	context = retrieve_context(user_input)
-	with st.spinner("Groq is thinking..."):
-		answer = groq_chat(user_input, context)
-	st.markdown(f"**Bot:** {answer}")
