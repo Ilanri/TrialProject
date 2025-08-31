@@ -1,5 +1,6 @@
 
 
+
 import os
 import streamlit as st
 import faiss
@@ -7,6 +8,7 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 import requests
 from db_utils import save_faiss_index, load_faiss_index, save_docs_and_embeddings, load_docs_and_embeddings
+from file_utils import save_uploaded_file, extract_text_from_file, SUPPORTED_TEXT, SUPPORTED_PDF, SUPPORTED_AUDIO
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"  # Placeholder, update as needed
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
@@ -85,19 +87,29 @@ if 'docs' not in st.session_state:
 		st.session_state.model = load_model()
 
 st.sidebar.header("Knowledge Base")
-uploaded_files = st.sidebar.file_uploader("Upload text files", type=["txt"], accept_multiple_files=True)
+
+uploaded_files = st.sidebar.file_uploader(
+	"Upload files (txt, pdf, audio)",
+	type=["txt", "pdf", "mp3", "wav", "ogg", "m4a"],
+	accept_multiple_files=True
+)
 if uploaded_files:
-	docs = []
-	for file in uploaded_files:
-		docs.append(file.read().decode("utf-8"))
-	st.session_state.docs = docs
-	embeddings = embed_texts(docs, st.session_state.model)
-	st.session_state.embeddings = embeddings
-	st.session_state.index = create_faiss_index(embeddings)
-	# Persist to disk
-	save_docs_and_embeddings(docs, embeddings, DOCS_EMB_PATH)
-	save_faiss_index(st.session_state.index, FAISS_INDEX_PATH)
-	st.sidebar.success(f"Loaded and saved {len(docs)} documents.")
+	new_docs = []
+	for uploaded_file in uploaded_files:
+		save_path = save_uploaded_file(uploaded_file, DB_DIR)
+		text = extract_text_from_file(save_path)
+		if text.strip():
+			new_docs.append(text)
+			# Also add to session state and persist
+			st.session_state.docs.append(text)
+	if new_docs:
+		# Re-embed all docs for simplicity (could optimize)
+		embeddings = embed_texts(st.session_state.docs, st.session_state.model)
+		st.session_state.embeddings = embeddings
+		st.session_state.index = create_faiss_index(embeddings)
+		save_docs_and_embeddings(st.session_state.docs, embeddings, DOCS_EMB_PATH)
+		save_faiss_index(st.session_state.index, FAISS_INDEX_PATH)
+		st.sidebar.success(f"Added and saved {len(new_docs)} new documents.")
 
 def retrieve_context(query, k=2):
 	if st.session_state.index is None:
