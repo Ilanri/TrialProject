@@ -61,15 +61,18 @@ def groq_chat(prompt, context=""):
 	persona = get_or_create_persona()
 	# Compose system prompt: persona + context
 	if persona:
-		system_prompt = f"{persona}\n\nUse the following context to help answer the user's question.\n{context}"
+		system_prompt = f"{persona}"
 	else:
-		system_prompt = context
+		system_prompt = "You are the person the questions are aabout."
+		
+	user_prompt = f"{prompt}\n\nUse the following context to answer the question informally, concisely and in first person form.\n{context}"
+		
 	headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
 	data = {
 		"model": "llama3-8b-8192",  # Example model name, update as needed
 		"messages": [
 			{"role": "system", "content": system_prompt},
-			{"role": "user", "content": prompt}
+			{"role": "user", "content": user_prompt}
 		]
 	}
 	response = requests.post(GROQ_API_URL, headers=headers, json=data)

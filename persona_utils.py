@@ -7,12 +7,16 @@ def construct_persona_from_intro(intro_text, llm_api_url, llm_api_key):
     Returns a concise persona prompt string.
     """
     system_prompt = (
-        "You are an expert at extracting personas and tone from background information. "
-        "Given the following introduction, write a concise persona description (1-2 sentences) that can be used as a system prompt for a chatbot to answer as this person. "
-        "Focus on style, tone, and relevant background."
+      "You are an expert at extracting personas and tone from background information. "
+      "Given the following introduction, create a **concise system prompt** for a chatbot. "
+      "The system prompt should guide the chatbot to respond in a way that reflects the persona, style, and tone of the individual described in the introduction. "
+      "Focus on the following elements: tone, personality traits, communication style, and any relevant background. "
+      "The output should only be the **system prompt** that can be used by the chatbot. "
+      "Do not add any additional text or explanations. Just the system prompt."
     )
+
     data = {
-        "model": "meta-llama/llama-guard-4-12b",
+        "model": "llama3-8b-8192",
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": intro_text}
