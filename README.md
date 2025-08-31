@@ -20,3 +20,5 @@ Use source .venv/bin/activate
 
 - Set your Groq API key in the environment variable `GROQ_API_KEY`.
 - Place your knowledge base files in the `data/` directory.
+
+ If you update intro.txt, simply delete persona_prompt.txt to force a new persona to be generated.

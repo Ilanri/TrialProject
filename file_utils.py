@@ -1,8 +1,10 @@
 import os
 from typing import List
 from pypdf import PdfReader
+
 from pydub import AudioSegment
 import tempfile
+from assemblyai_utils import transcribe_audio_assemblyai
 
 SUPPORTED_TEXT = [".txt"]
 SUPPORTED_PDF = [".pdf"]
@@ -18,9 +20,8 @@ def extract_text_from_pdf(file_path: str) -> str:
 
 
 def extract_text_from_audio(file_path: str) -> str:
-    # Placeholder: In production, use a speech-to-text API or model
-    # Here, just return a dummy string
-    return "[Audio transcription not implemented]"
+    # Use AssemblyAI for transcription
+    return transcribe_audio_assemblyai(file_path)
 
 
 def save_uploaded_file(uploaded_file, save_dir: str) -> str:
