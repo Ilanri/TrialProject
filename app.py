@@ -1,12 +1,17 @@
 
 
 
+
 import os
 import streamlit as st
 import faiss
 from sentence_transformers import SentenceTransformer
 import numpy as np
 import requests
+
+# Inject custom CSS for theme
+with open("style.css") as f:
+	st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 from db_utils import save_faiss_index, load_faiss_index, save_docs_and_embeddings, load_docs_and_embeddings
 from file_utils import save_uploaded_file, extract_text_from_file, SUPPORTED_TEXT, SUPPORTED_PDF, SUPPORTED_AUDIO
@@ -20,6 +25,26 @@ GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 DB_DIR = "db"
 INTRO_FILE = os.path.join(DB_DIR, "intro.txt")
 PERSONA_CACHE_FILE = os.path.join(DB_DIR, "persona_prompt.txt")
+
+# --- Context Switch: Tone Selector ---
+TONE_OPTIONS = {
+    "Interview Mode": "Answer concisely, professionally, and highlight achievements as if in a job interview.",
+    "Fast Facts": "Answer in bullet points or TL;DR style for quick reference.",
+    "Mentor Mode": "Answer like a helpful mentor—encouraging, insightful, and guiding.",
+    "Playful Mode": "Answer with light humor, metaphors, or fun comparisons while staying informative.",
+    "Casual Chat": "Answer like you would in a relaxed conversation with a peer—natural, friendly, and relatable.",
+		"Debug Mode": "Answer step-by-step, like explaining your reasoning while debugging code.",
+		"Analogy Mode": "Always explain with analogies and metaphors.",
+		"Concise": "Answer as briefly and to the point as possible, with no extra fluff."
+}
+
+st.sidebar.markdown("## Choose Response Tone")
+selected_tone = st.sidebar.radio(
+	"",
+	list(TONE_OPTIONS.keys()),
+	index=0,
+	key="tone_selector"
+)
 
 def get_or_create_persona():
 	# If persona already constructed and cached, use it
@@ -57,13 +82,15 @@ def create_faiss_index(embeddings):
 
 def groq_chat(prompt, context=""):
 	persona = get_or_create_persona()
-	# Compose system prompt: persona + context
+	# Get selected tone from session state (set by sidebar radio)
+	tone = st.session_state.get("tone_selector", "Friendly")
+	tone_instruction = TONE_OPTIONS.get(tone, "")
+	# Compose system prompt: persona + tone
 	if persona:
-		system_prompt = f"{persona}"
+		system_prompt = f"{persona}\n\n{tone_instruction}"
 	else:
-		system_prompt = "You are the person the questions are aabout."
-		
-	user_prompt = f"{prompt}\n\nUse the following context to answer the question informally, concisely and in first person form. Strictly stay within the provided context. \n{context}"
+		system_prompt = f"You are the person the questions are about.\n\n{tone_instruction}"
+	user_prompt = f"{prompt}\n\nUse the following context to answer the question in first person. Strictly stay within the provided context.\n{context}"
 
 	headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
 	data = {
@@ -78,9 +105,13 @@ def groq_chat(prompt, context=""):
 		return response.json()['choices'][0]['message']['content']
 	else:
 		return f"[Groq API error: {response.status_code}] - {response.text}"
-st.sidebar.markdown(f"**Persona config file:** `{INTRO_FILE}`")
 
-st.title("RAG Chatbot with Groq and FAISS")
+
+# Use accent color and heading font for title
+st.markdown(
+	'<h1 style="color:#4A6572; font-family:Century Gothic, sans-serif;">AI</h1>',
+	unsafe_allow_html=True
+)
 
 
 def try_load_db():
@@ -186,8 +217,7 @@ if 'docs' not in st.session_state:
 	st.session_state.chunk_file_map = all_chunk_file_map
 
 
-st.sidebar.header("Knowledge Base")
-st.sidebar.markdown("**Embedded files:**")
+st.sidebar.markdown("## Knowledge Base")
 if 'embedded_files' in st.session_state:
 	for fname in st.session_state.embedded_files:
 		st.sidebar.write(f"- {fname}")
@@ -204,21 +234,38 @@ def retrieve_context(query, k=10):
 	D, I = st.session_state.index.search(query_emb, k)
 	return "\n".join([st.session_state.docs[i] for i in I[0] if i < len(st.session_state.docs)])
 
-# --- Main Prompt/Answer Section ---
-st.write("Ask a question about your uploaded documents:")
+st.markdown(
+	'<h3 style="color:#4A6572; font-family:Century Gothic, sans-serif;">Ask any question <b>About Ilanri</b>:</h3>',
+	unsafe_allow_html=True
+)
 user_input = st.text_input("You:", value=st.session_state.get('user_input', ''), key="main_user_input")
 
 if st.button("Send", key="main_send_button") and user_input:
 	context = retrieve_context(user_input)
-	with st.spinner("Groq is thinking..."):
+	with st.spinner("I'm thinking..."):
 		answer = groq_chat(user_input, context)
-	st.markdown(f"**Bot:** {answer}")
 	st.session_state['user_input'] = ""
+	st.markdown(
+		f'<div style="background: linear-gradient(135deg, #F2F6F8 0%, #E6ECF0 100%); '
+		'border: 1.5px solid #4A6572; border-radius: 12px; padding: 1.2em 1.5em; '
+		'margin: 1.2em 0; color: #2C3A47; font-size: 1.13em; font-family: ArialMTPro-Regular, Arial, sans-serif; '
+		'box-shadow: 0 2px 12px rgba(74,101,114,0.08);">'
+		f'{answer}'
+		'</div>',
+		unsafe_allow_html=True
+	)
+
 
 # --- Enhance Database Section (below main prompt/answer) ---
 st.markdown("---")
-st.header("Enhance database")
-st.markdown("Upload files or add Q&A pairs to expand the knowledge base.")
+st.markdown(
+	'<h2 style="color:#4A6572; font-family:Century Gothic, sans-serif;">Enhance database</h2>',
+	unsafe_allow_html=True
+)
+st.markdown(
+	'<span style="color:#4A6572; font-family:ArialMTPro-Regular, Arial, sans-serif;">Upload files or add Q&A pairs to expand the knowledge base.</span>',
+	unsafe_allow_html=True
+)
 
 uploaded_files = st.file_uploader(
 	"Upload files (txt, pdf, audio)",
@@ -296,7 +343,10 @@ def update_suggested_questions_qa(latest_answer=None):
 	persona = get_or_create_persona()
 	st.session_state.suggested_questions = get_llm_suggested_questions(persona)
 
-st.markdown("**Add Q&A to database**")
+st.markdown(
+	'<h4 style="color:#4A6572; font-family:Century Gothic, sans-serif;">Add Q&A to database</h4>',
+	unsafe_allow_html=True
+)
 suggestion_cols = st.columns(len(st.session_state.suggested_questions))
 for i, q in enumerate(st.session_state.suggested_questions):
 	if suggestion_cols[i].button(q, key=f"qa_suggested_{i}"):

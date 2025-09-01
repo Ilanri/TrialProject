@@ -1,0 +1,397 @@
+/* =========================
+   Global Theme
+   ========================= */
+body,
+.stApp {
+  background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 50%, #F1F5F9 100%) !important;
+  background-attachment: fixed !important;
+  color: #4A6572 !important;
+  font-family: ArialMTPro-Regular, Arial, sans-serif !important;
+  transition: background 0.3s, color 0.3s;
+  min-height: 100vh;
+}
+
+/* Add subtle pattern overlay */
+.stApp::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(74, 101, 114, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(96, 125, 139, 0.02) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(176, 190, 197, 0.01) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* =========================
+   Headings
+   ========================= */
+h1,
+.stMarkdown h1 {
+  color: #2C3A47 !important;
+  font-family: 'Century Gothic', sans-serif !important;
+  font-size: 2.2em !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.6em;
+}
+
+h2,
+.stMarkdown h2 {
+  color: #4A6572 !important;
+  font-family: 'Century Gothic', sans-serif !important;
+  font-size: 1.5em !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.5em;
+}
+
+h3,
+.stMarkdown h3 {
+  color: #607D8B !important;
+  font-family: 'Century Gothic', sans-serif !important;
+  font-size: 1.2em !important;
+  font-weight: 500 !important;
+  margin-bottom: 0.4em;
+}
+
+/* =========================
+   Sidebar
+   ========================= */
+.stSidebar,
+.stSidebarContent,
+.css-1d391kg,
+.css-1lcbmhc {
+  background: rgba(245, 247, 250, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-right: 1px solid rgba(224, 228, 232, 0.8) !important;
+  color: #4A6572 !important;
+  box-shadow: 2px 0 15px rgba(74, 101, 114, 0.08) !important;
+}
+
+/* Sidebar headings */
+.stSidebar .stMarkdown strong {
+  color: #2C3A47 !important;
+  font-family: 'Century Gothic', sans-serif !important;
+  font-weight: 600;
+}
+
+/* Sidebar radio buttons */
+.stSidebar .stRadio>div>label {
+  background: linear-gradient(135deg, #c7d1d4 0%, #b1c4cc 100%) !important;
+  color: #2C3A47 !important;
+  border: 1px solid rgba(176, 190, 197, 0.6) !important;
+  border-radius: 8px !important;
+  margin-bottom: 0.5em;
+  padding: 0.6em 1em !important;
+  font-family: ArialMTPro-Regular, Arial, sans-serif !important;
+  font-size: 0.95em !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(74, 101, 114, 0.1) !important;
+}
+
+.stSidebar .stRadio>div>label:hover {
+  background: linear-gradient(135deg, #e0effa 0%, #c8e1f8 100%) !important;
+  color: #1A252F !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(74, 101, 114, 0.15) !important;
+}
+
+.stSidebar .stRadio>div[aria-checked="true"]>label {
+  background: linear-gradient(135deg, #4A6572 0%, #3A5462 100%) !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  border: 1px solid #4A6572 !important;
+  box-shadow: 0 4px 12px rgba(74, 101, 114, 0.25) !important;
+}
+
+.stSidebar .stRadio>label,
+.stSidebar .stRadio legend {
+  color: #4A6572 !important;
+  font-family: ArialMTPro-Regular, Arial, sans-serif !important;
+  font-size: 1.05em !important;
+  font-weight: 500 !important;
+}
+
+/* =========================
+   Buttons
+   ========================= */
+.stButton>button {
+  color: #4A6572 !important;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F2F6F8 100%) !important;
+  border: 1px solid rgba(209, 217, 222, 0.8) !important;
+  border-radius: 10px !important;
+  font-family: ArialMTPro-Regular, Arial, sans-serif !important;
+  padding: 0.7em 1.6em !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(74, 101, 114, 0.12) !important;
+  font-weight: 500 !important;
+}
+
+.stButton>button:hover {
+  background: linear-gradient(135deg, #E6ECF0 0%, #D1E7F0 100%) !important;
+  color: #2C3A47 !important;
+  border: 1px solid #4A6572 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 16px rgba(74, 101, 114, 0.2) !important;
+}
+
+.stButton>button:active {
+  transform: translateY(0px) !important;
+  box-shadow: 0 2px 8px rgba(74, 101, 114, 0.15) !important;
+}
+
+/* =========================
+   Form Submit Buttons
+   ========================= */
+.stForm .stFormSubmitButton>button,
+form[data-testid="form"] .stFormSubmitButton>button {
+  color: #FFFFFF !important;
+  background: linear-gradient(135deg, #4A6572 0%, #3A5462 100%) !important;
+  border: 1px solid #4A6572 !important;
+  border-radius: 10px !important;
+  font-family: ArialMTPro-Regular, Arial, sans-serif !important;
+  font-weight: 600 !important;
+  padding: 0.8em 2em !important;
+  transition: all 0.3s ease !important;
+  margin-top: 1.2em !important;
+  box-shadow: 0 3px 12px rgba(74, 101, 114, 0.25) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+.stForm .stFormSubmitButton>button:hover,
+form[data-testid="form"] .stFormSubmitButton>button:hover {
+  background: linear-gradient(135deg, #3A5462 0%, #2A4552 100%) !important;
+  border: 1px solid #3A5462 !important;
+  color: #FFFFFF !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(74, 101, 114, 0.35) !important;
+}
+
+.stForm .stFormSubmitButton>button:active,
+form[data-testid="form"] .stFormSubmitButton>button:active {
+  transform: translateY(0px) !important;
+  box-shadow: 0 3px 12px rgba(74, 101, 114, 0.25) !important;
+}
+
+/* =========================
+   Inputs & Text Fields
+   ========================= */
+.stTextInput>div>input,
+.stTextArea>div>textarea,
+.stForm .stTextArea>div>div>textarea,
+.stForm .stTextInput>div>div>input,
+form[data-testid="form"] .stTextArea>div>div>textarea,
+form[data-testid="form"] .stTextInput>div>div>input,
+div[data-testid="stTextArea"] textarea,
+div[data-testid="stTextInput"] input {
+  color: #2C3A47 !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(5px) !important;
+  border: 1.5px solid rgba(224, 228, 232, 0.8) !important;
+  border-radius: 8px !important;
+  font-family: ArialMTPro-Regular, Arial, sans-serif !important;
+  padding: 0.7em 1em !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(74, 101, 114, 0.08) !important;
+  font-size: 0.95em !important;
+}
+
+/* Focus states */
+.stTextInput>div>input:focus,
+.stTextArea>div>textarea:focus,
+.stForm .stTextArea>div>div>textarea:focus,
+.stForm .stTextInput>div>div>input:focus,
+form[data-testid="form"] .stTextArea>div>div>textarea:focus,
+form[data-testid="form"] .stTextInput>div>div>input:focus,
+div[data-testid="stTextArea"] textarea:focus,
+div[data-testid="stTextInput"] input:focus {
+  border: 2px solid #4A6572 !important;
+  box-shadow: 0 0 0 3px rgba(74, 101, 114, 0.1), 0 4px 12px rgba(74, 101, 114, 0.15) !important;
+  outline: none !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Input labels */
+.stTextInput>label,
+.stTextArea>label,
+.stForm .stTextArea>label,
+.stForm .stTextInput>label,
+form[data-testid="form"] .stTextArea>label,
+form[data-testid="form"] .stTextInput>label {
+  color: #4A6572 !important;
+  font-family: 'Century Gothic', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1em !important;
+  margin-bottom: 0.4em !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* =========================
+   Forms
+   ========================= */
+.stForm {
+  background: #FAFAFA !important;
+  border: 1px solid #E0E4E8 !important;
+  border-radius: 8px !important;
+  padding: 1.5em !important;
+  margin: 1em 0 !important;
+}
+
+/* =========================
+   Forms
+   ========================= */
+.stForm {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(224, 228, 232, 0.6) !important;
+  border-radius: 12px !important;
+  padding: 2em !important;
+  margin: 1.5em 0 !important;
+  box-shadow: 0 8px 32px rgba(74, 101, 114, 0.12) !important;
+}
+
+/* =========================
+   File Uploader / Drag & Drop
+   ========================= */
+.stFileUploader {
+  font-family: ArialMTPro-Regular, Arial, sans-serif !important;
+}
+
+.stFileUploader>label {
+  color: #4A6572 !important;
+  font-family: 'Century Gothic', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1em !important;
+  margin-bottom: 0.6em !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Drag and drop area */
+.stFileUploader>div>div,
+.stForm .stFileUploader>div>div,
+form[data-testid="form"] .stFileUploader>div>div {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(247, 249, 250, 0.9) 100%) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 2px dashed rgba(176, 190, 197, 0.7) !important;
+  border-radius: 12px !important;
+  color: #4A6572 !important;
+  padding: 2.5em !important;
+  text-align: center !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 16px rgba(74, 101, 114, 0.08) !important;
+}
+
+.stFileUploader>div>div:hover,
+.stForm .stFileUploader>div>div:hover,
+form[data-testid="form"] .stFileUploader>div>div:hover {
+  background: linear-gradient(135deg, rgba(237, 242, 244, 0.9) 0%, rgba(209, 231, 240, 0.9) 100%) !important;
+  border-color: #4A6572 !important;
+  border-style: solid !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(74, 101, 114, 0.15) !important;
+}
+
+/* File uploader text and buttons */
+.stFileUploader>div>div>div,
+.stFileUploader div[data-testid="stFileUploaderDropzoneInstructions"] {
+  color: #4A6572 !important;
+  font-family: ArialMTPro-Regular, Arial, sans-serif !important;
+  font-weight: 500 !important;
+}
+
+.stFileUploader button {
+  color: #4A6572 !important;
+  background: linear-gradient(135deg, #E6ECF0 0%, #D1E7F0 100%) !important;
+  border: 1px solid rgba(176, 190, 197, 0.8) !important;
+  border-radius: 8px !important;
+  font-family: ArialMTPro-Regular, Arial, sans-serif !important;
+  padding: 0.6em 1.4em !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(74, 101, 114, 0.1) !important;
+  font-weight: 500 !important;
+}
+
+.stFileUploader button:hover {
+  background: linear-gradient(135deg, #4A6572 0%, #3A5462 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid #4A6572 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(74, 101, 114, 0.2) !important;
+}
+
+/* Uploaded file display */
+.stFileUploader div[data-testid="fileUpload"] {
+  background: linear-gradient(135deg, rgba(230, 244, 234, 0.9) 0%, rgba(200, 230, 201, 0.8) 100%) !important;
+  backdrop-filter: blur(5px) !important;
+  border: 1px solid rgba(165, 214, 167, 0.8) !important;
+  border-radius: 8px !important;
+  color: #2E7D32 !important;
+  padding: 0.7em !important;
+  margin: 0.4em 0 !important;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.1) !important;
+  font-weight: 500 !important;
+}
+
+/* Delete file button */
+.stFileUploader button[kind="icon"] {
+  color: #E57373 !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0.3em !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+}
+
+.stFileUploader button[kind="icon"]:hover {
+  color: #C62828 !important;
+  background: rgba(253, 236, 234, 0.8) !important;
+  transform: scale(1.1) !important;
+}
+
+/* =========================
+   Alerts
+   ========================= */
+.stSuccess {
+  background: linear-gradient(135deg, rgba(214, 226, 217, 0.9) 0%, rgba(184, 212, 185, 0.8) 100%) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(165, 214, 167, 0.8) !important;
+  color: #2E7D32 !important;
+  font-family: ArialMTPro-Regular, Arial, sans-serif !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 16px rgba(46, 125, 50, 0.1) !important;
+  font-weight: 500 !important;
+}
+
+.stError {
+  background: #FDECEA !important;
+  border: 1px solid #E57373 !important;
+  color: #C62828 !important;
+  font-family: ArialMTPro-Regular, Arial, sans-serif !important;
+  border-radius: 6px !important;
+}
+
+.stWarning {
+  background: #FFF8E1 !important;
+  border: 1px solid #FFB74D !important;
+  color: #F57C00 !important;
+  font-family: ArialMTPro-Regular, Arial, sans-serif !important;
+  border-radius: 6px !important;
+}
+
+
+
+/* =========================
+   Spinner
+   ========================= */
+.stSpinner>div {
+  border-top-color: #4A6572 !important;
+}
