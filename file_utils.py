@@ -1,7 +1,6 @@
 import os
 from typing import List
 from pypdf import PdfReader
-from pydub import AudioSegment
 import tempfile
 from assemblyai_utils import transcribe_audio_assemblyai
 import re

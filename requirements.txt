@@ -4,10 +4,7 @@ sentence-transformers
 numpy
 requests
 pypdf
-pydub
 ffmpeg-python
 assemblyai
-pydub==0.25.1
 soundfile==0.12.1
 gTTS==2.3.2
-ffmpeg
