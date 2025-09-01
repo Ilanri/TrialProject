@@ -6,9 +6,9 @@ It leverages a custom knowledge base of personal documents, powered by a
 Retrieval-Augmented Generation (RAG) system to provide authentic,
 grounded answers in my voice.
 
-*Live Demo:* <https://aboutilanri.streamlit.app/>
+[[Live Demo]] (https://aboutilanri.streamlit.app/)
 
-*Video Walkthrough:* [Link to your 5-minute video explanation]
+[[Video Walkthrough]](https://drive.google.com/file/d/1dmHc96PUd5LyiCUZnwmiRRv9LApgGxf3/view?usp=sharing)
 
 ## System Setup & Design Choices
 
