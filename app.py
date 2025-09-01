@@ -26,16 +26,23 @@ DB_DIR = "db"
 INTRO_FILE = os.path.join(DB_DIR, "intro.txt")
 PERSONA_CACHE_FILE = os.path.join(DB_DIR, "persona_prompt.txt")
 
+# --- Sidebar User Image ---
+import streamlit as st
+import os
+image_path = os.path.join("db", "me.jpg")
+if os.path.exists(image_path):
+	st.sidebar.image(image_path, caption="This is Ilanri!", use_container_width=True)
+
 # --- Context Switch: Tone Selector ---
 TONE_OPTIONS = {
-    "Interview Mode": "Answer concisely, professionally, and highlight achievements as if in a job interview.",
-    "Fast Facts": "Answer in bullet points or TL;DR style for quick reference.",
-    "Mentor Mode": "Answer like a helpful mentor—encouraging, insightful, and guiding.",
-    "Playful Mode": "Answer with light humor, metaphors, or fun comparisons while staying informative.",
-    "Casual Chat": "Answer like you would in a relaxed conversation with a peer—natural, friendly, and relatable.",
-		"Debug Mode": "Answer step-by-step, like explaining your reasoning while debugging code.",
-		"Analogy Mode": "Always explain with analogies and metaphors.",
-		"Concise": "Answer as briefly and to the point as possible, with no extra fluff."
+	"Interview Mode": "Answer concisely, professionally, and highlight achievements as if in a job interview.",
+	"Fast Facts": "Answer in bullet points or TL;DR style for quick reference.",
+	"Mentor Mode": "Answer like a helpful mentor—encouraging, insightful, and guiding.",
+	"Playful Mode": "Answer with light humor, metaphors, or fun comparisons while staying informative.",
+	"Casual Chat": "Answer like you would in a relaxed conversation with a peer—natural, friendly, and relatable.",
+	"Debug Mode": "Answer step-by-step, like explaining your reasoning while debugging code.",
+	"Analogy Mode": "Always explain with analogies and metaphors.",
+	"Concise": "Answer as briefly and to the point as possible, with no extra fluff."
 }
 
 st.sidebar.markdown("## Choose Response Tone")
@@ -134,7 +141,10 @@ def load_all_supported_files_from_db():
 	file_list = []
 	file_map = {}
 	chunk_file_map = []  # Track which file each chunk comes from
+	EXCLUDE_FILES = {"embedded_files.txt", "persona_prompt.txt"}
 	for fname in os.listdir(DB_DIR):
+		if fname in EXCLUDE_FILES:
+			continue
 		ext = os.path.splitext(fname)[1].lower()
 		if ext in SUPPORTED_TEXT + SUPPORTED_PDF + SUPPORTED_AUDIO:
 			fpath = os.path.join(DB_DIR, fname)
@@ -257,9 +267,9 @@ if st.button("Send", key="main_send_button") and user_input:
 
 
 # --- Enhance Database Section (below main prompt/answer) ---
-st.markdown("---")
+st.markdown("<hr style='border: 1.5px solid #D1D9DE; margin: 2em 0;'>", unsafe_allow_html=True)
 st.markdown(
-	'<h2 style="color:#4A6572; font-family:Century Gothic, sans-serif;">Enhance database</h2>',
+	'<h2 style="color:#4A6572; font-family:Century Gothic, sans-serif;">Enhance Knowledge Base</h2>',
 	unsafe_allow_html=True
 )
 st.markdown(
@@ -268,7 +278,7 @@ st.markdown(
 )
 
 uploaded_files = st.file_uploader(
-	"Upload files (txt, pdf, audio)",
+	"",
 	type=["txt", "pdf", "mp3", "wav", "ogg", "m4a"],
 	accept_multiple_files=True,
 	key="file_uploader_enhance"
@@ -343,10 +353,6 @@ def update_suggested_questions_qa(latest_answer=None):
 	persona = get_or_create_persona()
 	st.session_state.suggested_questions = get_llm_suggested_questions(persona)
 
-st.markdown(
-	'<h4 style="color:#4A6572; font-family:Century Gothic, sans-serif;">Add Q&A to database</h4>',
-	unsafe_allow_html=True
-)
 suggestion_cols = st.columns(len(st.session_state.suggested_questions))
 for i, q in enumerate(st.session_state.suggested_questions):
 	if suggestion_cols[i].button(q, key=f"qa_suggested_{i}"):
@@ -363,7 +369,7 @@ with st.form("add_qa_form"):
 	user_answer = st.text_area("Answer", value=st.session_state.qa_answer, key="qa_answer")
 	submit_qa = st.form_submit_button("Add Q&A", key="submit_qa_button")
 	if submit_qa and user_question.strip() and user_answer.strip():
-		with st.spinner("Adding Q&A to database..."):
+		with st.spinner("Adding Q&A to knowledge base..."):
 			qa_text = f"Q: {user_question.strip()}\nA: {user_answer.strip()}"
 			st.session_state.docs.append(qa_text)
 			st.session_state.chunk_file_map.append("manual_QA")
@@ -372,7 +378,7 @@ with st.form("add_qa_form"):
 			st.session_state.index = create_faiss_index(embeddings)
 			save_docs_and_embeddings(st.session_state.docs, embeddings, DOCS_EMB_PATH)
 			save_faiss_index(st.session_state.index, FAISS_INDEX_PATH)
-		st.success("Q&A pair added to database.")
+		st.success("Q&A pair added to knowledge base.")
 		update_suggested_questions_qa(user_answer)
 		# Rerun to clear form fields safely
 		st.rerun()
