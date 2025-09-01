@@ -18,6 +18,7 @@ from persona_utils import construct_persona_from_intro
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"  # Placeholder, update as needed
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+GROQ_API_KEY_2 = st.secrets.get("GROQ_API_KEY_2")
 
 # Config: path to intro file for persona
 DB_DIR = "db"
@@ -143,6 +144,16 @@ def groq_chat(prompt, context=""):
     if response.status_code == 200:
         logger.info("Groq LLM call successful.")
         return response.json()['choices'][0]['message']['content']
+    elif GROQ_API_KEY_2:
+        logger.warning(f"Groq API key 1 failed ({response.status_code}). Trying fallback key.")
+        headers["Authorization"] = f"Bearer {GROQ_API_KEY_2}"
+        response2 = requests.post(GROQ_API_URL, headers=headers, json=data)
+        if response2.status_code == 200:
+            logger.info("Groq LLM call successful with fallback key.")
+            return response2.json()['choices'][0]['message']['content']
+        else:
+            logger.error(f"Groq API error (fallback): {response2.status_code} - {response2.text}")
+            return f"[Groq API error (fallback): {response2.status_code}] - {response2.text}"
     else:
         logger.error(f"Groq API error: {response.status_code} - {response.text}")
         return f"[Groq API error: {response.status_code}] - {response.text}"

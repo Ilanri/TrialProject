@@ -1,3 +1,4 @@
 intro.txt
+Rationale.pdf
 Faithfulness, Not Fame.mp3
 CV.pdf
