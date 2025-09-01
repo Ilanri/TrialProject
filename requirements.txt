@@ -1,4 +1,9 @@
 streamlit
 faiss-cpu
 sentence-transformers
-groq
+numpy
+requests
+pypdf
+pydub
+ffmpeg-python
+assemblyai
