@@ -1,5 +1,9 @@
 import requests
 import os
+import logging
+
+DEBUG = os.environ.get("DEBUG", "0") == "1"
+logger = logging.getLogger("persona_utils")
 
 def construct_persona_from_intro(intro_text, llm_api_url, llm_api_key):
     """
@@ -25,6 +29,9 @@ def construct_persona_from_intro(intro_text, llm_api_url, llm_api_key):
     headers = {"Authorization": f"Bearer {llm_api_key}", "Content-Type": "application/json"}
     response = requests.post(llm_api_url, headers=headers, json=data)
     if response.status_code == 200:
-        return response.json()['choices'][0]['message']['content']
+        persona = response.json()['choices'][0]['message']['content']
+        logger.info("Persona constructed from intro text.")
+        return persona
     else:
+        logger.error(f"Failed to construct persona from intro: {response.status_code}")
         return f"[Persona construction error: {response.status_code}]"

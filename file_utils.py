@@ -5,6 +5,7 @@ import tempfile
 from assemblyai_utils import transcribe_audio_assemblyai
 import re
 import unicodedata
+import logging
 
 # Supported file types
 SUPPORTED_TEXT = [".txt"]
@@ -19,8 +20,10 @@ def save_uploaded_file(uploaded_file, save_dir: str) -> str:
     try:
         with open(save_path, "wb") as f:
             f.write(uploaded_file.getbuffer())
+        logger.info(f"Saved uploaded file: {uploaded_file.name} to {save_dir}")
     except Exception as e:
-        raise IOError(f"Error saving file {uploaded_file.name}: {e}")
+        logger.error(f"Failed to save uploaded file: {uploaded_file.name} to {save_dir}: {e}")
+        raise
     return save_path
 
 # Text cleaning function for PDFs
@@ -93,3 +96,6 @@ def extract_text_from_file(file_path: str) -> List[str]:
         return chunk_text_by_paragraphs(text)
     except Exception as e:
         raise ValueError(f"Error extracting text from file {file_path}: {e}")
+
+DEBUG = os.environ.get("DEBUG", "0") == "1"
+logger = logging.getLogger("file_utils")
